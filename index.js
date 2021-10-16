@@ -1,16 +1,17 @@
 
 //parent element to store cards
-const taskContainer = document.querySelector(".taskContainer");
+const taskContainer = document.querySelector(".task_Container");
 
 //global store
-const globalStore = [] ;
+let globalStore = [] ;
 
 const newCard = ({id,imageurl,tasktitle,taskdescription,tasktype}) =>
  ` <div class="col-md-6 col-lg-4" id=${id}>
 <div class="card ">
  <div class="card-header d-flex justify-content-end gap-2">
   <button type="button" class="btn btn-outline-success"><i class="fas fa-pencil-alt"></i></button>
-  <button type="button" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+  <button type="button" id=${id} class="btn btn-outline-danger" onclick="deleteCard.apply(this,arguments)" >
+  <i class="fas fa-trash-alt" id=${id} onclick="deleteCard.apply(this, arguments)" ></i></button>
  </div>
 <img src=${imageurl} class="card-img-top" alt="...">
 <div class="card-body">
@@ -26,7 +27,7 @@ const newCard = ({id,imageurl,tasktitle,taskdescription,tasktype}) =>
 
 const loadInitialTaskCards = () => {
 
-  const getInitialData = localStorage.getItem("tasky"); //access localstorage
+  const getInitialData = localStorage.tasky; //access localstorage
   if (!getInitialData) return;
  
   const {cards} = JSON.parse(getInitialData); //stringify object to object
@@ -38,6 +39,8 @@ const loadInitialTaskCards = () => {
   });
 
 };
+
+const  updateLocalStorage = () => localStorage.setItem("tasky", JSON.stringify({cards:globalStore}))
 
 const saveChanges = () => {
   const taskData = {
@@ -54,7 +57,23 @@ const saveChanges = () => {
   taskContainer.insertAdjacentHTML("beforeend",createNewCard);
   globalStore.push(taskData);
   
-  localStorage.setItem("tasky",JSON.stringify({cards: globalStore}));
-
+  updateLocalStorage();
 };
 
+const deleteCard = (event) => {
+  
+  event = window.event;
+  const targetID = event.target.id;
+  const tagname = event.target.tagName;
+  globalStore = globalStore.filter((cardObject) => cardObject.id !== targetID);
+  
+updateLocalStorage();
+
+if(tagname === "BUTTON"){
+   return taskContainer.removeChild(
+   event.target.parentNode.parentNode.parentNode);
+}
+return taskContainer.removeChild(
+  event.target.parentNode.parentNode.parentNode.parentNode);
+
+};
